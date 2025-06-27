@@ -1,0 +1,61 @@
+name: docker_to_docker_comunication
+
+services:
+  receiver:
+    container_name: receiver
+    hostname: receiver
+    networks:
+      - default
+    volumes:
+      - receiver_volume:/local_bind
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=UTC
+    build: .
+    command: ["bash", "-c", "
+      echo 'Receiver initialized'; 
+      iperf3 -s --file /local_bind/iperf3_receiver.json;
+      sleep infinity;
+      "]
+
+  sender:
+    container_name: sender
+    hostname: sender
+    networks:
+      - default
+    volumes:
+      - sender_volume:/local_bind
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=UTC
+    depends_on:
+      - receiver
+    build: .
+    command: ["bash", "-c", "
+      echo 'Sender initialized'; 
+      iperf3 -c receiver -t 30 --format M --verbose;
+      sleep infinity; 
+      "]
+
+volumes:
+  receiver_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./host_volume
+  sender_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./host_volume
+    
+networks:
+  default:
+    driver: bridge
+
+
+
+
+
