@@ -4,8 +4,9 @@ services:
   receiver:
     container_name: receiver
     hostname: receiver
-    networks:
-      - default
+    # networks:
+    #   - default
+    network_mode: host
     volumes:
       - receiver_volume:/local_bind
     environment:
@@ -14,26 +15,29 @@ services:
     build: .
     command: ["bash", "-c", "
       echo 'Receiver initialized'; 
-      iperf3 -s --file /local_bind/iperf3_receiver.json;
+      ./run_receiver.sh;
       sleep infinity;
       "]
 
   sender:
     container_name: sender
     hostname: sender
-    networks:
-      - default
+    # networks:
+    #   - default
+    network_mode: host
     volumes:
       - sender_volume:/local_bind
     environment:
       - DEBIAN_FRONTEND=noninteractive
       - TZ=UTC
+      - RECEIVER_IP=localhost
     depends_on:
       - receiver
     build: .
     command: ["bash", "-c", "
       echo 'Sender initialized'; 
-      iperf3 -c receiver -t 30 --format M --verbose;
+      ./run_sender.sh;
+      ./run_formatter.sh;
       sleep infinity; 
       "]
 
@@ -51,9 +55,9 @@ volumes:
       type: none
       device: ./host_volume
     
-networks:
-  default:
-    driver: bridge
+# networks:
+#   default:
+#     driver: bridge
 
 
 
