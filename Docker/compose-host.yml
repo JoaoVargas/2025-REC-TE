@@ -1,0 +1,57 @@
+name: docker_to_docker_comunication
+
+services:
+  receiver:
+    container_name: receiver
+    hostname: receiver
+    network_mode: host
+    volumes:
+      - receiver_volume:/local_bind
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=UTC
+    build: .
+    command: ["bash", "-c", "
+      echo 'Receiver initialized'; 
+      ./run_receiver.sh;
+      sleep infinity;
+      "]
+
+  sender:
+    container_name: sender
+    hostname: sender
+    network_mode: host
+    volumes:
+      - sender_volume:/local_bind
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=UTC
+      - RECEIVER_IP=localhost
+    depends_on:
+      - receiver
+    build: .
+    command: ["bash", "-c", "
+      echo 'Sender initialized'; 
+      ./run_sender.sh;
+      ./run_formatter.sh;
+      sleep infinity; 
+      "]
+
+volumes:
+  receiver_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./host_volume
+  sender_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./host_volume
+
+
+
+
+

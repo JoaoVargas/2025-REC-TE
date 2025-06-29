@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in {1..2}; do
+for i in {1..30}; do
     iperf3 -c "$RECEIVER_IP" -t 10 --format M --verbose
     echo "Run $i completed"
     sleep 1

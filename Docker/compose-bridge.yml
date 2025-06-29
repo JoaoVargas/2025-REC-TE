@@ -4,9 +4,8 @@ services:
   receiver:
     container_name: receiver
     hostname: receiver
-    # networks:
-    #   - default
-    network_mode: host
+    networks:
+      - default
     volumes:
       - receiver_volume:/local_bind
     environment:
@@ -22,15 +21,14 @@ services:
   sender:
     container_name: sender
     hostname: sender
-    # networks:
-    #   - default
-    network_mode: host
+    networks:
+      - default
     volumes:
       - sender_volume:/local_bind
     environment:
       - DEBIAN_FRONTEND=noninteractive
       - TZ=UTC
-      - RECEIVER_IP=localhost
+      - RECEIVER_IP=receiver
     depends_on:
       - receiver
     build: .
@@ -55,9 +53,9 @@ volumes:
       type: none
       device: ./host_volume
     
-# networks:
-#   default:
-#     driver: bridge
+networks:
+  default:
+    driver: bridge
 
 
 
